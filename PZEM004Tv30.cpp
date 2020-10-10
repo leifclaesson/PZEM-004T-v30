@@ -2,7 +2,7 @@
 Copyright (c) 2019 Jakub Mandula
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the â€œSoftwareâ€), to deal in
+this software and associated documentation files (the “Software”), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
@@ -11,7 +11,7 @@ subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED â€œAS ISâ€, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
@@ -106,6 +106,13 @@ PZEM004Tv30::PZEM004Tv30(HardwareSerial* port, uint8_t addr)
     init(addr);
 }
 
+PZEM004Tv30::PZEM004Tv30(Stream * port, uint8_t addr)
+{
+    this->_serial = port;
+    this->_isSoft = false;
+    init(addr);
+}
+
 /*!
  * PZEM004Tv30::~PZEM004Tv30
  *
@@ -114,8 +121,10 @@ PZEM004Tv30::PZEM004Tv30(HardwareSerial* port, uint8_t addr)
 */
 PZEM004Tv30::~PZEM004Tv30()
 {
+#if defined(PZEM004_SOFTSERIAL)
     if(_isSoft)
         delete this->_serial;
+#endif
 }
 
 /*!
@@ -179,7 +188,7 @@ float PZEM004Tv30::energy()
 }
 
 /*!
- * PZEM004Tv30::frequeny
+ * PZEM004Tv30::frequency
  *
  * Get current line frequency in Hz
  *
@@ -190,7 +199,7 @@ float PZEM004Tv30::frequency()
     if(!updateValues()) // Update vales if necessary
         return NAN; // Update did not work, return NAN
 
-    return _currentValues.frequeny;
+    return _currentValues.frequency;
 }
 
 /*!
@@ -399,7 +408,7 @@ bool PZEM004Tv30::updateValues()
                               (uint32_t)response[15] << 24 |
                               (uint32_t)response[16] << 16) / 1000.0;
 
-    _currentValues.frequeny =((uint32_t)response[17] << 8 | // Raw Frequency in 0.1Hz
+    _currentValues.frequency =((uint32_t)response[17] << 8 | // Raw Frequency in 0.1Hz
                               (uint32_t)response[18]) / 10.0;
 
     _currentValues.pf =      ((uint32_t)response[19] << 8 | // Raw pf in 0.01
